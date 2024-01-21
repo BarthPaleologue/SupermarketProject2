@@ -49,9 +49,11 @@ public class MyTechnique : InteractionTechnique
                 hoveredShelf.isSelected = true;
 
                 // Checking that the user pushed the trigger
-                if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f && hasHit)
+                if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f)
                 {
-                    // we will do something here later
+                    shelf.transform.parent = rightController.transform;
+                } else {
+                    shelf.transform.parent = null;
                 }
             }
         }
