@@ -8,6 +8,10 @@ public class MyTechnique : InteractionTechnique
     [SerializeField]
     int raycastMaxDistance = 1000;
 
+
+    [SerializeField]
+    private GameObject leftController;
+
     [SerializeField]
     private GameObject rightController;
 
