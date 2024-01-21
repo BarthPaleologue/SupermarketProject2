@@ -32,7 +32,7 @@ public class MyTechnique : InteractionTechnique
         lineRenderer.SetPosition(0, rightControllerTransform.position);
 
         // detect single trigger press (use timer to prevent multiple presses)
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f)
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.1f)
         {
             if(!isTriggerPressed) {
                 isTriggerPressedOnce = true;
