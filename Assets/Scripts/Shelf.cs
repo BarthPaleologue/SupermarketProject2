@@ -22,7 +22,7 @@ public class Shelf : MonoBehaviour
 
     [SerializeField] private float flySpeed = 0.4f;
     [SerializeField] private float rotateSpeed = 15.0f;
-    [SerializeField] private float scaleSpeed = 0.1f;
+    [SerializeField] private float scaleSpeed = 0.005f;
 
     [SerializeField] private ShelfState state = ShelfState.Idle;
 
@@ -73,6 +73,9 @@ public class Shelf : MonoBehaviour
     {
         state = ShelfState.FlyingToHand;
         this.targetParentHand = hand;
+
+        float distance = (hand.position - this.transform.position).magnitude;
+        flySpeed = distance / 10;
     }
 
     public void Release() {
@@ -102,7 +105,7 @@ public class Shelf : MonoBehaviour
             this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetParentHand.rotation, this.rotateSpeed);
             this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, this.targetScale, this.scaleSpeed);
 
-            if(this.transform.position == this.targetParentHand.position && this.transform.rotation == this.targetParentHand.rotation) {
+            if(this.transform.position == this.targetParentHand.position && this.transform.rotation == this.targetParentHand.rotation && this.transform.localScale == this.targetScale) {
                 state = ShelfState.Manipulating;
                 this.transform.parent = targetParentHand;
             }
@@ -114,11 +117,11 @@ public class Shelf : MonoBehaviour
 
         // The shelf is flying away
         if(state == ShelfState.Releasing) {
-            this.transform.position = Vector3.MoveTowards(this.transform.position, originalPosition, this.flySpeed);
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, originalRotation, this.rotateSpeed);
-            this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, originalScale, this.scaleSpeed);
+            this.transform.position = Vector3.MoveTowards(this.transform.position, originalPosition, this.flySpeed * 2);
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, originalRotation, this.rotateSpeed * 2);
+            this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, originalScale, this.scaleSpeed * 2);
 
-            if(this.transform.position == originalPosition && this.transform.rotation == originalRotation) {
+            if(this.transform.position == originalPosition && this.transform.rotation == originalRotation && this.transform.localScale == originalScale) {
                 state = ShelfState.Idle;
             }
         }
