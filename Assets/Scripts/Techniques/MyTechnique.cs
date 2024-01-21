@@ -15,17 +15,56 @@ public class MyTechnique : InteractionTechnique
     [SerializeField]
     private GameObject rightController;
 
-    private LineRenderer lineRenderer;
+    private LineRenderer leftHandLineRenderer;
+    private LineRenderer rightHandLineRenderer;
 
     private Shelf hoveredShelf = null;
     private Shelf manipulatedShelf = null;
 
-    private bool isTriggerPressed = false;
-    private bool isTriggerPressedOnce = false;
+    private bool isLeftTriggerPressed = false;
+    private bool isLeftTriggerPressedOnce = false;
+
+    private bool isRightTriggerPressed = false;
+    private bool isRightTriggerPressedOnce = false;
 
     private void Start()
     {
-        lineRenderer = rightController.GetComponent<LineRenderer>();
+        leftHandLineRenderer = leftController.GetComponent<LineRenderer>();
+        rightHandLineRenderer = rightController.GetComponent<LineRenderer>();
+    }
+
+    private void UpdateInputState() {
+        // Manage trigger press from left controller
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f)
+        {
+            if(!isLeftTriggerPressed) {
+                isLeftTriggerPressedOnce = true;
+            } else {
+                isLeftTriggerPressedOnce = false;
+            }
+            isLeftTriggerPressed = true;
+        }
+        else
+        {
+            isLeftTriggerPressed = false;
+            isLeftTriggerPressedOnce = false;
+        }
+
+        // Manage trigger press from right controller
+        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.1f)
+        {
+            if(!isRightTriggerPressed) {
+                isRightTriggerPressedOnce = true;
+            } else {
+                isRightTriggerPressedOnce = false;
+            }
+            isRightTriggerPressed = true;
+        }
+        else
+        {
+            isRightTriggerPressed = false;
+            isRightTriggerPressedOnce = false;
+        }
     }
 
     private void FixedUpdate()
@@ -33,29 +72,16 @@ public class MyTechnique : InteractionTechnique
         Transform rightControllerTransform = rightController.transform;
 
         // Set the beginning of the line renderer to the position of the controller
-        lineRenderer.SetPosition(0, rightControllerTransform.position);
+        leftHandLineRenderer.SetPosition(0, leftController.transform.position);
+        rightHandLineRenderer.SetPosition(0, rightControllerTransform.position);
 
-        // detect single trigger press (use timer to prevent multiple presses)
-        if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.1f)
-        {
-            if(!isTriggerPressed) {
-                isTriggerPressedOnce = true;
-            } else {
-                isTriggerPressedOnce = false;
-            }
-            isTriggerPressed = true;
-        }
-        else
-        {
-            isTriggerPressed = false;
-            isTriggerPressedOnce = false;
-        }
+        UpdateInputState();
 
         // Creating a raycast and storing the first hit if existing
-        RaycastHit hit;
-        bool hasHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out hit, Mathf.Infinity);
+        RaycastHit rightHit;
+        bool hasRightHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out rightHit, Mathf.Infinity);
 
-        if (!hasHit)
+        if (!hasRightHit)
         {
             // if we are not hitting anything, we should unselect the shelf we were hovering over
             if (hoveredShelf != null)
@@ -67,7 +93,7 @@ public class MyTechnique : InteractionTechnique
         else
         {
             // if we are hitting something, we should select the shelf we are hovering over
-            GameObject hitObject = hit.collider.gameObject;
+            GameObject hitObject = rightHit.collider.gameObject;
             if (hitObject.tag == "shelfHighlight")
             {
                 GameObject shelf = hitObject.transform.parent.gameObject;
@@ -79,7 +105,7 @@ public class MyTechnique : InteractionTechnique
                 hoveredShelf.isSelected = true;
 
                 // Checking that the user pushed the trigger
-                if (this.isTriggerPressedOnce)
+                if (this.isRightTriggerPressedOnce)
                 {
                     if (hoveredShelf != manipulatedShelf)
                     {
@@ -92,13 +118,27 @@ public class MyTechnique : InteractionTechnique
         }
 
         // Determining the end of the LineRenderer depending on whether we hit an object or not
-        if (hasHit)
+        if (hasRightHit)
         {
-            lineRenderer.SetPosition(1, hit.point);
+            rightHandLineRenderer.SetPosition(1, rightHit.point);
         }
         else
         {
-            lineRenderer.SetPosition(1, raycastMaxDistance * rightControllerTransform.forward);
+            rightHandLineRenderer.SetPosition(1, raycastMaxDistance * rightControllerTransform.forward);
+        }
+
+
+        // Creating a raycast and storing the first hit if existing
+        RaycastHit leftHit;
+        bool hasLeftHit = Physics.Raycast(leftController.transform.position, leftController.transform.forward, out leftHit, Mathf.Infinity);
+
+        if(hasLeftHit)
+        {
+            leftHandLineRenderer.SetPosition(1, leftHit.point);
+        }
+        else
+        {
+            leftHandLineRenderer.SetPosition(1, raycastMaxDistance * leftController.transform.forward);
         }
 
         // DO NOT REMOVE
