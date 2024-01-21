@@ -2,15 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+enum ShelfState
+{
+    Idle,
+    Manipulating,
+    Releasing
+}
+
 public class Shelf : MonoBehaviour
 {
     public bool isSelected = false;
 
     public Material material;
 
+    [SerializeField] private Vector3 originalPosition;
+    [SerializeField] private Quaternion originalRotation;
+
+    [SerializeField] private ShelfState state = ShelfState.Idle;
+
     // Start is called before the first frame update
     void Start()
     {
+        originalPosition = this.transform.position;
+        originalRotation = this.transform.rotation;
+
+        // get the size of the shelf
         Vector3 shelfSize = this.GetComponent<Renderer>().bounds.size;
 
         // create a new box
@@ -53,6 +69,20 @@ public class Shelf : MonoBehaviour
         else
         {
             material.color = new Color(1, 1, 1, 0.2f);
+        }
+
+        if(state == ShelfState.Manipulating) {
+            // do some stuff
+        }
+
+        // The shelf is flying away
+        if(state == ShelfState.Releasing) {
+            this.transform.position = Vector3.MoveTowards(this.transform.position, originalPosition, 0.4f);
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, originalRotation, 15.0f);
+
+            if(this.transform.position == originalPosition && this.transform.rotation == originalRotation) {
+                state = ShelfState.Idle;
+            }
         }
     }
 }
