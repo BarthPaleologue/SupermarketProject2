@@ -13,6 +13,8 @@ public class MyTechnique : InteractionTechnique
 
     private LineRenderer lineRenderer;
 
+    private Shelf hoveredShelf = null;
+
     private void Start()
     {
         lineRenderer = rightController.GetComponent<LineRenderer>();
@@ -28,21 +30,30 @@ public class MyTechnique : InteractionTechnique
         // Creating a raycast and storing the first hit if existing
         RaycastHit hit;
         bool hasHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out hit, Mathf.Infinity);
-
-        // Checking that the user pushed the trigger
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f && hasHit)
-        {
-            GameObject hitObject = hit.collider.gameObject;
-
-            // if hit object has tag "shelfHighlight" then its parent has a Shelf component and must be selected
-            if (hitObject.tag == "shelfHighlight")
-            {
-                GameObject shelf = hitObject.transform.parent.gameObject;
-                shelf.GetComponent<Shelf>().isSelected = true;
+        
+        if(!hasHit) {
+            // if we are not hitting anything, we should unselect the shelf we were hovering over
+            if(hoveredShelf != null) {
+                hoveredShelf.isSelected = false;
+                hoveredShelf = null;
             }
+        } else {
+            // if we are hitting something, we should select the shelf we are hovering over
+            GameObject hitObject = hit.collider.gameObject;
+            if(hitObject.tag == "shelfHighlight") {
+                GameObject shelf = hitObject.transform.parent.gameObject;
+                if(hoveredShelf != null && hoveredShelf != shelf) {
+                    hoveredShelf.isSelected = false;
+                }
+                hoveredShelf = shelf.GetComponent<Shelf>();
+                hoveredShelf.isSelected = true;
 
-            // Sending the selected object hit by the raycast
-            // currentSelectedObject = hitObject;
+                // Checking that the user pushed the trigger
+                if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f && hasHit)
+                {
+                    // we will do something here later
+                }
+            }
         }
 
         // Determining the end of the LineRenderer depending on whether we hit an object or not
