@@ -19,7 +19,7 @@ public class SelectableObject : MonoBehaviour
 
         // raycast downward to set parent to the shelf below
         RaycastHit hit;
-        float distance = 1.0f;
+        float distance = 2.0f;
         Vector3 dir = Vector3.down;
         if (Physics.Raycast(transform.position, dir, out hit, distance))
         {
