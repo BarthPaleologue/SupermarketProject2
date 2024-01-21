@@ -5,22 +5,59 @@ using UnityEngine;
 // Your implemented technique inherits the InteractionTechnique class
 public class MyTechnique : InteractionTechnique
 {
-    // You must implement your technique in this file
-    // You need to assign the selected Object to the currentSelectedObject variable
-    // Then it will be sent through a UnityEvent to another class for handling
+    [SerializeField]
+    int raycastMaxDistance = 1000;
+
+    [SerializeField]
+    private GameObject rightController;
+
+    private LineRenderer lineRenderer;
+
     private void Start()
     {
-        // TODO
+        lineRenderer = rightController.GetComponent<LineRenderer>();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        //TODO : Select a GameObject and assign it to the currentSelectedObject variable
+        Transform rightControllerTransform = rightController.transform;
+        
+        // Set the beginning of the line renderer to the position of the controller
+        lineRenderer.SetPosition(0, rightControllerTransform.position);
 
+        // Creating a raycast and storing the first hit if existing
+        RaycastHit hit;
+        bool hasHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out hit, Mathf.Infinity);
+
+        // Checking that the user pushed the trigger
+        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f && hasHit)
+        {
+            GameObject hitObject = hit.collider.gameObject;
+
+            // if hit object has tag "shelfHighlight" then its parent has a Shelf component and must be selected
+            if (hitObject.tag == "shelfHighlight")
+            {
+                GameObject shelf = hitObject.transform.parent.gameObject;
+                shelf.GetComponent<Shelf>().isSelected = true;
+            }
+
+            // Sending the selected object hit by the raycast
+            // currentSelectedObject = hitObject;
+        }
+
+        // Determining the end of the LineRenderer depending on whether we hit an object or not
+        if (hasHit)
+        {
+            lineRenderer.SetPosition(1, hit.point);
+        }
+        else
+        {
+            lineRenderer.SetPosition(1, raycastMaxDistance * rightControllerTransform.forward);
+        }
 
         // DO NOT REMOVE
         // If currentSelectedObject is not null, this will send it to the TaskManager for handling
-        // Then it will set currentSelectedObject back to null
         base.CheckForSelection();
     }
+
 }

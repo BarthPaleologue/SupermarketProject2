@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class shelf : MonoBehaviour
+public class Shelf : MonoBehaviour
 {
     public bool isSelected = false;
 
@@ -15,6 +15,9 @@ public class shelf : MonoBehaviour
 
         // create a new box
         GameObject box = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+        // add tag to box
+        box.tag = "shelfHighlight";
         
         // position the box at the same position as the shelf
         box.transform.position = this.transform.position;
@@ -22,10 +25,10 @@ public class shelf : MonoBehaviour
         // set the height of the box
         float boxHeight = 2.2f;
         Vector3 boxSize = new Vector3(shelfSize.x, boxHeight, shelfSize.z);
-        box.transform.localScale = boxSize;
+        box.transform.localScale = boxSize * 1.02f;
 
         // move the box up by half its height
-        box.transform.position = new Vector3(box.transform.position.x, box.transform.position.y + boxHeight / 2, box.transform.position.z);
+        box.transform.position = new Vector3(box.transform.position.x, box.transform.position.y + boxHeight / 2 - shelfSize.y / 2, box.transform.position.z);
 
         // set the material of the box to be transparent
         material = new Material(Shader.Find("Transparent/Diffuse"));
