@@ -18,7 +18,8 @@ public class MyTechnique : InteractionTechnique
     private LineRenderer leftHandLineRenderer;
     private LineRenderer rightHandLineRenderer;
 
-    private Shelf hoveredShelf = null;
+    private Shelf leftHoveredShelf = null;
+    private Shelf rightHoveredShelf = null;
     private Shelf manipulatedShelf = null;
 
     private bool isLeftTriggerPressed = false;
@@ -84,10 +85,10 @@ public class MyTechnique : InteractionTechnique
         if (!hasRightHit)
         {
             // if we are not hitting anything, we should unselect the shelf we were hovering over
-            if (hoveredShelf != null)
+            if (rightHoveredShelf != null)
             {
-                hoveredShelf.isSelected = false;
-                hoveredShelf = null;
+                rightHoveredShelf.isSelected = false;
+                rightHoveredShelf = null;
             }
         }
         else
@@ -97,21 +98,21 @@ public class MyTechnique : InteractionTechnique
             if (hitObject.tag == "shelfHighlight")
             {
                 GameObject shelf = hitObject.transform.parent.gameObject;
-                if (hoveredShelf != null && hoveredShelf != shelf)
+                if (rightHoveredShelf != null && rightHoveredShelf != shelf)
                 {
-                    hoveredShelf.isSelected = false;
+                    rightHoveredShelf.isSelected = false;
                 }
-                hoveredShelf = shelf.GetComponent<Shelf>();
-                hoveredShelf.isSelected = true;
+                rightHoveredShelf = shelf.GetComponent<Shelf>();
+                rightHoveredShelf.isSelected = true;
 
                 // Checking that the user pushed the trigger
                 if (this.isRightTriggerPressedOnce)
                 {
-                    if (hoveredShelf != manipulatedShelf)
+                    if (rightHoveredShelf != manipulatedShelf)
                     {
                         if(manipulatedShelf != null) manipulatedShelf.Release();
-                        manipulatedShelf = hoveredShelf;
-                        hoveredShelf.FlyToHand(rightController.transform);
+                        manipulatedShelf = rightHoveredShelf;
+                        rightHoveredShelf.FlyToHand(rightController.transform);
                     }
                 }
             }
@@ -131,6 +132,42 @@ public class MyTechnique : InteractionTechnique
         // Creating a raycast and storing the first hit if existing
         RaycastHit leftHit;
         bool hasLeftHit = Physics.Raycast(leftController.transform.position, leftController.transform.forward, out leftHit, Mathf.Infinity);
+
+        if (!hasLeftHit)
+        {
+            // if we are not hitting anything, we should unselect the shelf we were hovering over
+            if (leftHoveredShelf != null)
+            {
+                leftHoveredShelf.isSelected = false;
+                leftHoveredShelf = null;
+            }
+        }
+        else
+        {
+            // if we are hitting something, we should select the shelf we are hovering over
+            GameObject hitObject = leftHit.collider.gameObject;
+            if (hitObject.tag == "shelfHighlight")
+            {
+                GameObject shelf = hitObject.transform.parent.gameObject;
+                if (leftHoveredShelf != null && leftHoveredShelf != shelf)
+                {
+                    leftHoveredShelf.isSelected = false;
+                }
+                leftHoveredShelf = shelf.GetComponent<Shelf>();
+                leftHoveredShelf.isSelected = true;
+
+                // Checking that the user pushed the trigger
+                if (this.isLeftTriggerPressedOnce)
+                {
+                    if (leftHoveredShelf != manipulatedShelf)
+                    {
+                        if(manipulatedShelf != null) manipulatedShelf.Release();
+                        manipulatedShelf = leftHoveredShelf;
+                        leftHoveredShelf.FlyToHand(leftController.transform);
+                    }
+                }
+            }
+        }
 
         if(hasLeftHit)
         {
