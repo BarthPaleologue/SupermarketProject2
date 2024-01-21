@@ -22,7 +22,7 @@ public class Shelf : MonoBehaviour
 
     [SerializeField] private float flySpeed = 0.4f;
     [SerializeField] private float rotateSpeed = 15.0f;
-    [SerializeField] private float scaleSpeed = 0.005f;
+    [SerializeField] private float scaleSpeed = 0.2f;
 
     [SerializeField] private ShelfState state = ShelfState.Idle;
 
@@ -101,11 +101,20 @@ public class Shelf : MonoBehaviour
                 Debug.Log("targetParentHand is null");
             }
 
-            this.transform.position = Vector3.MoveTowards(this.transform.position, targetParentHand.position, this.flySpeed);
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetParentHand.rotation, this.rotateSpeed);
+            Vector3 targetPosition = this.targetParentHand.position;
+            // move the shelf in the forward direction of the hand and a little bit in the up direction of the hand
+            targetPosition += this.targetParentHand.forward * 0.2f;
+            targetPosition += this.targetParentHand.up * 0.1f;
+
+            Quaternion targetRotation = this.targetParentHand.rotation;
+            // rotate the shelf 90 degrees around the y axis
+            targetRotation *= Quaternion.Euler(0, 90, 0);
+
+            this.transform.position = Vector3.MoveTowards(this.transform.position, targetPosition, this.flySpeed);
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRotation, this.rotateSpeed);
             this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, this.targetScale, this.scaleSpeed);
 
-            if(this.transform.position == this.targetParentHand.position && this.transform.rotation == this.targetParentHand.rotation && this.transform.localScale == this.targetScale) {
+            if(this.transform.position == targetPosition && this.transform.rotation == targetRotation && this.transform.localScale == this.targetScale) {
                 state = ShelfState.Manipulating;
                 this.transform.parent = targetParentHand;
             }
