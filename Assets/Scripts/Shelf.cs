@@ -5,6 +5,7 @@ using UnityEngine;
 enum ShelfState
 {
     Idle,
+    FlyingToHand,
     Manipulating,
     Releasing
 }
@@ -17,14 +18,23 @@ public class Shelf : MonoBehaviour
 
     [SerializeField] private Vector3 originalPosition;
     [SerializeField] private Quaternion originalRotation;
+    [SerializeField] private Vector3 originalScale;
+
+    [SerializeField] private float flySpeed = 0.4f;
+    [SerializeField] private float rotateSpeed = 15.0f;
+    [SerializeField] private float scaleSpeed = 0.1f;
 
     [SerializeField] private ShelfState state = ShelfState.Idle;
+
+    Transform targetParentHand = null;
+    Vector3 targetScale = new Vector3(0.1f, 0.1f, 0.1f);
 
     // Start is called before the first frame update
     void Start()
     {
         originalPosition = this.transform.position;
         originalRotation = this.transform.rotation;
+        originalScale = this.transform.localScale;
 
         // get the size of the shelf
         Vector3 shelfSize = this.GetComponent<Renderer>().bounds.size;
@@ -59,6 +69,18 @@ public class Shelf : MonoBehaviour
         box.transform.parent = this.transform;
     }
 
+    public void FlyToHand(Transform hand)
+    {
+        state = ShelfState.FlyingToHand;
+        this.targetParentHand = hand;
+    }
+
+    public void Release() {
+        state = ShelfState.Releasing;
+        this.transform.parent = null;
+        this.targetParentHand = null;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -71,14 +93,30 @@ public class Shelf : MonoBehaviour
             material.color = new Color(1, 1, 1, 0.2f);
         }
 
+        if(state == ShelfState.FlyingToHand) {
+            if(this.targetParentHand == null) {
+                Debug.Log("targetParentHand is null");
+            }
+
+            this.transform.position = Vector3.MoveTowards(this.transform.position, targetParentHand.position, this.flySpeed);
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetParentHand.rotation, this.rotateSpeed);
+            this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, this.targetScale, this.scaleSpeed);
+
+            if(this.transform.position == this.targetParentHand.position && this.transform.rotation == this.targetParentHand.rotation) {
+                state = ShelfState.Manipulating;
+                this.transform.parent = targetParentHand;
+            }
+        }
+
         if(state == ShelfState.Manipulating) {
             // do some stuff
         }
 
         // The shelf is flying away
         if(state == ShelfState.Releasing) {
-            this.transform.position = Vector3.MoveTowards(this.transform.position, originalPosition, 0.4f);
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, originalRotation, 15.0f);
+            this.transform.position = Vector3.MoveTowards(this.transform.position, originalPosition, this.flySpeed);
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, originalRotation, this.rotateSpeed);
+            this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, originalScale, this.scaleSpeed);
 
             if(this.transform.position == originalPosition && this.transform.rotation == originalRotation) {
                 state = ShelfState.Idle;

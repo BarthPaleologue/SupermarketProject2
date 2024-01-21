@@ -14,6 +14,7 @@ public class MyTechnique : InteractionTechnique
     private LineRenderer lineRenderer;
 
     private Shelf hoveredShelf = null;
+    private Shelf manipulatedShelf = null;
 
     private void Start()
     {
@@ -51,9 +52,11 @@ public class MyTechnique : InteractionTechnique
                 // Checking that the user pushed the trigger
                 if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f)
                 {
-                    shelf.transform.parent = rightController.transform;
-                } else {
-                    shelf.transform.parent = null;
+                    if(manipulatedShelf != null) {
+                        manipulatedShelf.Release();
+                    }
+                    manipulatedShelf = hoveredShelf;
+                    hoveredShelf.FlyToHand(rightController.transform);
                 }
             }
         }
