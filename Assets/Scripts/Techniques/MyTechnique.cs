@@ -72,6 +72,17 @@ public class MyTechnique : InteractionTechnique
         rightTeleportTarget.SetActive(false);
     }
 
+    private void Teleport(Vector3 target) {
+        OVRCameraRig.transform.position = new Vector3(target.x, OVRCameraRig.transform.position.y, target.z);
+        rightTeleportTarget.SetActive(false);
+        leftTeleportTarget.SetActive(false);
+
+        if(manipulatedShelf != null) {
+            manipulatedShelf.Release();
+            manipulatedShelf = null;
+        }
+    }
+
     private void UpdateInputState()
     {
         // Manage trigger press from left controller
@@ -147,7 +158,7 @@ public class MyTechnique : InteractionTechnique
                     rightTeleportTarget.transform.position = rightHit.point;
                     if (this.isRightTriggerPressedOnce)
                     {
-                        OVRCameraRig.transform.position = new Vector3(rightHit.point.x, OVRCameraRig.transform.position.y, rightHit.point.z);
+                        Teleport(rightHit.point);
                     }
                 }
             }
@@ -236,7 +247,7 @@ public class MyTechnique : InteractionTechnique
                     leftTeleportTarget.transform.position = leftHit.point;
                     if (this.isLeftTriggerPressedOnce)
                     {
-                        OVRCameraRig.transform.position = new Vector3(leftHit.point.x, OVRCameraRig.transform.position.y, leftHit.point.z);
+                        Teleport(leftHit.point);
                     }
                 }
             }
