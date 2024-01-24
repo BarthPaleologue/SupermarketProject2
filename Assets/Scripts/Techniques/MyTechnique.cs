@@ -101,7 +101,7 @@ public class MyTechnique : InteractionTechnique
             // if we are not hitting anything, we should unselect the shelf we were hovering over
             if (rightHoveredShelf != null)
             {
-                rightHoveredShelf.isSelected = false;
+                rightHoveredShelf.SetHighlighted(false);
                 rightHoveredShelf = null;
             }
         }
@@ -119,7 +119,7 @@ public class MyTechnique : InteractionTechnique
                     // As we are selecting an item on the manipulated shelf, we are not hovering over another shelf
                     if (rightHoveredShelf != null)
                     {
-                        rightHoveredShelf.isSelected = false;
+                        rightHoveredShelf.SetHighlighted(false);
                         rightHoveredShelf = null;
                     }
 
@@ -129,10 +129,10 @@ public class MyTechnique : InteractionTechnique
                 {
                     if (rightHoveredShelf != null && rightHoveredShelf != shelf)
                     {
-                        rightHoveredShelf.isSelected = false;
+                        rightHoveredShelf.SetHighlighted(false);
                     }
                     rightHoveredShelf = shelf;
-                    rightHoveredShelf.isSelected = true;
+                    rightHoveredShelf.SetHighlighted(true);
 
                     // Checking that the user pushed the trigger
                     if (this.isRightTriggerPressedOnce)
@@ -162,7 +162,7 @@ public class MyTechnique : InteractionTechnique
             // if we are not hitting anything, we should unselect the shelf we were hovering over
             if (leftHoveredShelf != null)
             {
-                leftHoveredShelf.isSelected = false;
+                leftHoveredShelf.SetHighlighted(false);
                 leftHoveredShelf = null;
             }
         }
@@ -175,10 +175,10 @@ public class MyTechnique : InteractionTechnique
                 GameObject shelf = hitObject.transform.parent.gameObject;
                 if (leftHoveredShelf != null && leftHoveredShelf != shelf)
                 {
-                    leftHoveredShelf.isSelected = false;
+                    leftHoveredShelf.SetHighlighted(false);
                 }
                 leftHoveredShelf = shelf.GetComponent<Shelf>();
-                leftHoveredShelf.isSelected = true;
+                leftHoveredShelf.SetHighlighted(true);
 
                 // Checking that the user pushed the trigger
                 if (this.isLeftTriggerPressedOnce)
@@ -235,7 +235,7 @@ public class MyTechnique : InteractionTechnique
 
                 if (rightHoveredShelf != null)
                 {
-                    rightHoveredShelf.isSelected = false;
+                    rightHoveredShelf.SetHighlighted(false);
                     rightHoveredShelf = null;
                 }
             }
@@ -263,7 +263,7 @@ public class MyTechnique : InteractionTechnique
 
                 if (leftHoveredShelf != null)
                 {
-                    leftHoveredShelf.isSelected = false;
+                    leftHoveredShelf.SetHighlighted(false);
                     leftHoveredShelf = null;
                 }
             }

@@ -12,7 +12,6 @@ enum ShelfState
 
 public class Shelf : MonoBehaviour
 {
-    public bool isSelected = false;
 
     public Material material;
 
@@ -37,6 +36,9 @@ public class Shelf : MonoBehaviour
     Vector3 targetScale = new Vector3(0.1f, 0.1f, 0.1f);
 
     GameObject highlightBox;
+    private Color originalHighlightColor = new Color(1, 1, 1, 0.1f);
+    private Color selectedHighlightColor = new Color(0, 1, 0, 0.5f);
+    private bool isHighlighted = false;
 
     private float timer = 0.0f;
     private float animationDuration = 0.5f;
@@ -75,7 +77,7 @@ public class Shelf : MonoBehaviour
         material = new Material(Shader.Find("Transparent/Diffuse"));
 
         // change the color of the box
-        material.color = new Color(1, 0, 0, 0.5f);
+        material.color = originalHighlightColor;
 
         // set the material of the box
         box.GetComponent<Renderer>().material = material;
@@ -84,6 +86,10 @@ public class Shelf : MonoBehaviour
         box.transform.parent = this.transform;
 
         this.highlightBox = box;
+    }
+
+    public void SetHighlighted(bool highlighted) {
+        isHighlighted = highlighted;
     }
 
     public void FlyToHand(Transform hand, Hand rightLeft)
@@ -140,13 +146,10 @@ public class Shelf : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isSelected)
-        {
-            material.color = new Color(0, 1, 0, 0.5f);
-        }
-        else
-        {
-            material.color = new Color(1, 1, 1, 0.1f);
+        if(isHighlighted) {
+            material.color = selectedHighlightColor;
+        } else {
+            material.color = originalHighlightColor;
         }
 
         if(state == ShelfState.FlyingToHand) {
