@@ -38,6 +38,9 @@ public class Shelf : MonoBehaviour
 
     GameObject highlightBox;
 
+    private float timer = 0.0f;
+    private float animationDuration = 0.5f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -89,13 +92,17 @@ public class Shelf : MonoBehaviour
         this.targetParentHand = hand;
 
         if(rightLeft == Hand.Left) {
-            xOffset = 0.25f;
+            xOffset = 0.3f;
         } else {
-            xOffset = -0.25f;
+            xOffset = -0.3f;
         }
 
         float distance = (hand.position - this.transform.position).magnitude;
         flySpeed = distance / 10;
+
+        this.transform.localScale = this.targetScale;
+
+        timer = 0.0f;
 
         // for every child that has layer "GroceryItems" (layer 6), set it to layer "SelectedGroceryItems" (layer 7)
         foreach (Transform child in this.transform)
@@ -114,6 +121,8 @@ public class Shelf : MonoBehaviour
         state = ShelfState.Releasing;
         this.transform.parent = null;
         this.targetParentHand = null;
+
+        timer = 0.0f;
 
         // for every child that has layer "SelectedGroceryItems" (layer 7), set it to layer "GroceryItems" (layer 6)
         foreach (Transform child in this.transform)
@@ -145,6 +154,11 @@ public class Shelf : MonoBehaviour
                 Debug.Log("targetParentHand is null");
             }
 
+            timer += Time.deltaTime;
+
+            float t = timer / animationDuration;
+            float easeInOutT = 0.5f * (Mathf.Sin((t - 0.5f) * Mathf.PI) + 1);
+
             Vector3 targetPosition = this.targetParentHand.position;
             // move the shelf in the forward direction of the hand and a little bit in the up direction of the hand
             targetPosition += this.targetParentHand.forward * 0.2f;
@@ -156,9 +170,9 @@ public class Shelf : MonoBehaviour
             // rotate the shelf 90 degrees around the y axis
             targetRotation *= Quaternion.Euler(0, 90, 0);
 
-            this.transform.position = Vector3.MoveTowards(this.transform.position, targetPosition, this.flySpeed);
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRotation, this.rotateSpeed);
-            this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, this.targetScale, this.scaleSpeed);
+            this.transform.position = Vector3.Lerp(this.transform.position, targetPosition, easeInOutT);
+            this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targetRotation, easeInOutT);
+            //this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, this.targetScale, this.scaleSpeed);
 
             if(this.transform.position == targetPosition && this.transform.rotation == targetRotation && this.transform.localScale == this.targetScale) {
                 state = ShelfState.Manipulating;
@@ -172,9 +186,14 @@ public class Shelf : MonoBehaviour
 
         // The shelf is flying away
         if(state == ShelfState.Releasing) {
-            this.transform.position = Vector3.MoveTowards(this.transform.position, originalPosition, this.flySpeed * 2);
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, originalRotation, this.rotateSpeed * 2);
-            this.transform.localScale = Vector3.MoveTowards(this.transform.localScale, originalScale, this.scaleSpeed * 2);
+            timer += Time.deltaTime;
+
+            float t = timer / animationDuration;
+            float easeInOutT = 0.5f * (Mathf.Sin((t - 0.5f) * Mathf.PI) + 1);
+
+            this.transform.position = Vector3.Lerp(this.transform.position, originalPosition, easeInOutT);
+            this.transform.rotation = Quaternion.Lerp(this.transform.rotation, originalRotation, easeInOutT);
+            this.transform.localScale = Vector3.Lerp(this.transform.localScale, originalScale, easeInOutT);
 
             if(this.transform.position == originalPosition && this.transform.rotation == originalRotation && this.transform.localScale == originalScale) {
                 state = ShelfState.Idle;
