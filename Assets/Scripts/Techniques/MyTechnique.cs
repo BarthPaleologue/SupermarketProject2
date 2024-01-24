@@ -77,7 +77,7 @@ public class MyTechnique : InteractionTechnique
     private void Teleport(Vector3 target)
     {
         // clamp z to avoid teleporting through the wall
-        float z = Mathf.Clamp(target.z, -4.0f, 4.0f);
+        float z = Mathf.Clamp(target.z, -3.0f, 3.0f);
         OVRCameraRig.transform.position = new Vector3(target.x, OVRCameraRig.transform.position.y, z);
         rightTeleportTarget.SetActive(false);
         leftTeleportTarget.SetActive(false);
