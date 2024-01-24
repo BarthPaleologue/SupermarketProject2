@@ -74,14 +74,16 @@ public class MyTechnique : InteractionTechnique
         rightTeleportTarget.SetActive(false);
     }
 
-    private void Teleport(Vector3 target) {
+    private void Teleport(Vector3 target)
+    {
         // clamp z to avoid teleporting through the wall
         float z = Mathf.Clamp(target.z, -4.0f, 4.0f);
         OVRCameraRig.transform.position = new Vector3(target.x, OVRCameraRig.transform.position.y, z);
         rightTeleportTarget.SetActive(false);
         leftTeleportTarget.SetActive(false);
 
-        if(manipulatedShelf != null) {
+        if (manipulatedShelf != null)
+        {
             manipulatedShelf.Release();
             manipulatedShelf = null;
         }
@@ -297,7 +299,7 @@ public class MyTechnique : InteractionTechnique
             this.hoveredSelectableObject.DisplayBoundingBox(false);
         }
         this.hoveredSelectableObject = selectableObject;
-        selectableObject.DisplayBoundingBox(true);
+        if (selectableObject != null) selectableObject.DisplayBoundingBox(true);
     }
 
     private void FixedUpdate()
@@ -325,9 +327,9 @@ public class MyTechnique : InteractionTechnique
                 GameObject item = itemHit.collider.gameObject;
 
                 SelectableObject selectableObject = item.GetComponent<SelectableObject>();
-                
+
                 this.SetHoveredSelectableObject(selectableObject);
-                
+
                 if (selectableObject != null)
                 {
                     if (this.isRightTriggerPressedOnce)
@@ -356,7 +358,7 @@ public class MyTechnique : InteractionTechnique
                 GameObject item = itemHit.collider.gameObject;
 
                 SelectableObject selectableObject = item.GetComponent<SelectableObject>();
-                
+
                 this.SetHoveredSelectableObject(selectableObject);
 
                 if (selectableObject != null)
@@ -376,6 +378,11 @@ public class MyTechnique : InteractionTechnique
                     leftHoveredShelf = null;
                 }
             }
+        }
+
+        if (isRightShelfSelectionNeeded && isLeftShelfSelectionNeeded)
+        {
+            this.SetHoveredSelectableObject(null);
         }
 
         if (isRightShelfSelectionNeeded) HandleRightShelfSelection();

@@ -31,25 +31,23 @@ public class SelectableObject : MonoBehaviour
             transform.parent = hit.transform;
         }
 
-        // create a new box
+        // create a new box to representing the box collider (same scale and orientation as the object, with bounds of the box collider)
         GameObject box = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        box.transform.position = this.transform.position;
+        box.transform.localScale = this.GetComponent<BoxCollider>().size;
+        box.transform.rotation = this.transform.rotation;
+        box.transform.position = this.transform.position + this.GetComponent<BoxCollider>().center;
 
-        Vector3 bounds = this.GetComponent<Renderer>().bounds.size;
-        Vector3 boxSize = bounds + new Vector3(0.01f, 0.01f, 0.01f);
-        box.transform.localScale = boxSize;
+        // set the box to be a child of the object
+        box.transform.parent = this.transform;
 
-        // remove the collider from the box
+
+        // remove the box collider from the box
         Destroy(box.GetComponent<BoxCollider>());
-
-        // move the box up by half its height
-        //box.transform.position = new Vector3(box.transform.position.x, box.transform.position.y + boxHeight / 2 - shelfSize.y / 2, box.transform.position.z);
 
         // set the material of the box to be transparent
         Material material = new Material(Shader.Find("Transparent/Diffuse"));
         material.color = new Color(1, 1, 1, 0.3f);
         box.GetComponent<Renderer>().material = material;
-        box.transform.parent = this.transform;
         box.SetActive(false);
 
         this.boundingBoxHelper = box;
