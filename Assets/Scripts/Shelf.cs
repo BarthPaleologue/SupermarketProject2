@@ -23,6 +23,13 @@ public class Shelf : MonoBehaviour
     [SerializeField] private float flySpeed = 0.4f;
     [SerializeField] private float rotateSpeed = 15.0f;
     [SerializeField] private float scaleSpeed = 0.2f;
+    
+    /// <summary>
+    /// The offset of the shelf from the hand controller.
+    /// This helps manipulation as the shelf will be closer to the center of the screen.
+    /// This is in local coordinates.
+    /// </summary>
+    private float xOffset = 0.0f;
 
     [SerializeField] private ShelfState state = ShelfState.Idle;
 
@@ -76,10 +83,16 @@ public class Shelf : MonoBehaviour
         this.highlightBox = box;
     }
 
-    public void FlyToHand(Transform hand)
+    public void FlyToHand(Transform hand, Hand rightLeft)
     {
         state = ShelfState.FlyingToHand;
         this.targetParentHand = hand;
+
+        if(rightLeft == Hand.Left) {
+            xOffset = 0.25f;
+        } else {
+            xOffset = -0.25f;
+        }
 
         float distance = (hand.position - this.transform.position).magnitude;
         flySpeed = distance / 10;
@@ -136,6 +149,8 @@ public class Shelf : MonoBehaviour
             // move the shelf in the forward direction of the hand and a little bit in the up direction of the hand
             targetPosition += this.targetParentHand.forward * 0.2f;
             targetPosition += this.targetParentHand.up * 0.1f;
+            // move the shelf in the direction of the offset
+            targetPosition += this.targetParentHand.right * xOffset;
 
             Quaternion targetRotation = this.targetParentHand.rotation;
             // rotate the shelf 90 degrees around the y axis

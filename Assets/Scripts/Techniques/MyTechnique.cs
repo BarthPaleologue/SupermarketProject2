@@ -9,6 +9,12 @@ enum State
     ManipulatingRight,
 }
 
+public enum Hand
+{
+    Left,
+    Right
+}
+
 // Your implemented technique inherits the InteractionTechnique class
 public class MyTechnique : InteractionTechnique
 {
@@ -84,13 +90,120 @@ public class MyTechnique : InteractionTechnique
         }
     }
 
+    private void HandleShelfSelection()
+    {
+        // Creating a raycast and storing the first hit if existing
+        RaycastHit rightHit;
+        bool hasRightHit = Physics.Raycast(rightController.transform.position, rightController.transform.forward, out rightHit, Mathf.Infinity);
+
+        if (!hasRightHit)
+        {
+            // if we are not hitting anything, we should unselect the shelf we were hovering over
+            if (rightHoveredShelf != null)
+            {
+                rightHoveredShelf.isSelected = false;
+                rightHoveredShelf = null;
+            }
+        }
+        else
+        {
+            // if we are hitting something, we should select the shelf we are hovering over
+            GameObject hitObject = rightHit.collider.gameObject;
+            if (hitObject.tag == "shelfHighlight")
+            {
+                GameObject shelfObject = hitObject.transform.parent.gameObject;
+                Shelf shelf = shelfObject.GetComponent<Shelf>();
+
+                if (shelf == manipulatedShelf)
+                {
+                    // As we are selecting an item on the manipulated shelf, we are not hovering over another shelf
+                    if (rightHoveredShelf != null)
+                    {
+                        rightHoveredShelf.isSelected = false;
+                        rightHoveredShelf = null;
+                    }
+
+
+                }
+                else
+                {
+                    if (rightHoveredShelf != null && rightHoveredShelf != shelf)
+                    {
+                        rightHoveredShelf.isSelected = false;
+                    }
+                    rightHoveredShelf = shelf;
+                    rightHoveredShelf.isSelected = true;
+
+                    // Checking that the user pushed the trigger
+                    if (this.isRightTriggerPressedOnce)
+                    {
+                        if (rightHoveredShelf != manipulatedShelf)
+                        {
+                            if (manipulatedShelf != null) manipulatedShelf.Release();
+                            manipulatedShelf = rightHoveredShelf;
+                            rightHoveredShelf.FlyToHand(rightController.transform, Hand.Right);
+
+                            state = State.ManipulatingRight;
+                        }
+                    }
+
+                    rightHandLineRenderer.SetPosition(1, rightHit.point);
+                }
+            }
+        }
+
+
+        // Creating a raycast and storing the first hit if existing
+        RaycastHit leftHit;
+        bool hasLeftHit = Physics.Raycast(leftController.transform.position, leftController.transform.forward, out leftHit, Mathf.Infinity);
+
+        if (!hasLeftHit)
+        {
+            // if we are not hitting anything, we should unselect the shelf we were hovering over
+            if (leftHoveredShelf != null)
+            {
+                leftHoveredShelf.isSelected = false;
+                leftHoveredShelf = null;
+            }
+        }
+        else
+        {
+            // if we are hitting something, we should select the shelf we are hovering over
+            GameObject hitObject = leftHit.collider.gameObject;
+            if (hitObject.tag == "shelfHighlight")
+            {
+                GameObject shelf = hitObject.transform.parent.gameObject;
+                if (leftHoveredShelf != null && leftHoveredShelf != shelf)
+                {
+                    leftHoveredShelf.isSelected = false;
+                }
+                leftHoveredShelf = shelf.GetComponent<Shelf>();
+                leftHoveredShelf.isSelected = true;
+
+                // Checking that the user pushed the trigger
+                if (this.isLeftTriggerPressedOnce)
+                {
+                    if (leftHoveredShelf != manipulatedShelf)
+                    {
+                        if (manipulatedShelf != null) manipulatedShelf.Release();
+                        manipulatedShelf = leftHoveredShelf;
+                        leftHoveredShelf.FlyToHand(leftController.transform, Hand.Left);
+
+                        state = State.ManipulatingLeft;
+                    }
+                }
+
+                leftHandLineRenderer.SetPosition(1, leftHit.point);
+            }
+        }
+    }
+
     private void FixedUpdate()
     {
-        Transform rightControllerTransform = rightController.transform;
 
         // Update line renderer to default position (this will be overwritten if we hit something)
-        rightHandLineRenderer.SetPosition(0, rightControllerTransform.position + rightControllerTransform.forward * 0.05f);
-        rightHandLineRenderer.SetPosition(1, raycastMaxDistance * rightControllerTransform.forward);
+        rightHandLineRenderer.SetPosition(0, rightController.transform.position + rightController.transform.forward * 0.05f);
+        rightHandLineRenderer.SetPosition(1, raycastMaxDistance * rightController.transform.forward);
 
         leftHandLineRenderer.SetPosition(0, leftController.transform.position + leftController.transform.forward * 0.05f);
         leftHandLineRenderer.SetPosition(1, raycastMaxDistance * leftController.transform.forward);
@@ -103,25 +216,22 @@ public class MyTechnique : InteractionTechnique
         {
             // We perform a raycast from the right controller on the layer "SelectableGroceryItems" (layer 7)
             RaycastHit itemHit;
-            bool hasItemHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out itemHit, Mathf.Infinity, 1 << 7);
+            bool hasItemHit = Physics.Raycast(rightController.transform.position, rightController.transform.forward, out itemHit, Mathf.Infinity, 1 << 7);
             if (hasItemHit)
             {
                 GameObject item = itemHit.collider.gameObject;
 
-                if (item.tag == "groceryItem")
+                SelectableObject selectableObject = item.GetComponent<SelectableObject>();
+                if (selectableObject != null)
                 {
-                    SelectableObject selectableObject = item.GetComponent<SelectableObject>();
-                    if (selectableObject != null)
+                    if (this.isRightTriggerPressedOnce)
                     {
-                        if (this.isRightTriggerPressedOnce)
-                        {
-                            this.currentSelectedObject = item;
-                        }
+                        this.currentSelectedObject = item;
                     }
-
-                    rightHandLineRenderer.SetPosition(1, itemHit.point);
-                    isShelfSelectionNeeded = false;
                 }
+
+                rightHandLineRenderer.SetPosition(1, itemHit.point);
+                isShelfSelectionNeeded = false;
             }
         }
         else if (state == State.ManipulatingRight)
@@ -133,132 +243,21 @@ public class MyTechnique : InteractionTechnique
             {
                 GameObject item = itemHit.collider.gameObject;
 
-                if (item.tag == "groceryItem")
+                SelectableObject selectableObject = item.GetComponent<SelectableObject>();
+                if (selectableObject != null)
                 {
-                    SelectableObject selectableObject = item.GetComponent<SelectableObject>();
-                    if (selectableObject != null)
-                    {
-                        if (this.isLeftTriggerPressedOnce)
-                        {
-                            this.currentSelectedObject = item;
-                        }
-                    }
-
-                    leftHandLineRenderer.SetPosition(1, itemHit.point);
-                    isShelfSelectionNeeded = false;
-                }
-            }
-        }
-
-        if (isShelfSelectionNeeded)
-        {
-
-            // Creating a raycast and storing the first hit if existing
-            RaycastHit rightHit;
-            bool hasRightHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out rightHit, Mathf.Infinity);
-
-            if (!hasRightHit)
-            {
-                // if we are not hitting anything, we should unselect the shelf we were hovering over
-                if (rightHoveredShelf != null)
-                {
-                    rightHoveredShelf.isSelected = false;
-                    rightHoveredShelf = null;
-                }
-            }
-            else
-            {
-                // if we are hitting something, we should select the shelf we are hovering over
-                GameObject hitObject = rightHit.collider.gameObject;
-                if (hitObject.tag == "shelfHighlight")
-                {
-                    GameObject shelfObject = hitObject.transform.parent.gameObject;
-                    Shelf shelf = shelfObject.GetComponent<Shelf>();
-
-                    if (shelf == manipulatedShelf)
-                    {
-                        // As we are selecting an item on the manipulated shelf, we are not hovering over another shelf
-                        if (rightHoveredShelf != null)
-                        {
-                            rightHoveredShelf.isSelected = false;
-                            rightHoveredShelf = null;
-                        }
-
-
-                    }
-                    else
-                    {
-                        if (rightHoveredShelf != null && rightHoveredShelf != shelf)
-                        {
-                            rightHoveredShelf.isSelected = false;
-                        }
-                        rightHoveredShelf = shelf;
-                        rightHoveredShelf.isSelected = true;
-
-                        // Checking that the user pushed the trigger
-                        if (this.isRightTriggerPressedOnce)
-                        {
-                            if (rightHoveredShelf != manipulatedShelf)
-                            {
-                                if (manipulatedShelf != null) manipulatedShelf.Release();
-                                manipulatedShelf = rightHoveredShelf;
-                                rightHoveredShelf.FlyToHand(rightController.transform);
-
-                                state = State.ManipulatingRight;
-                            }
-                        }
-
-                        rightHandLineRenderer.SetPosition(1, rightHit.point);
-                    }
-                }
-            }
-
-
-            // Creating a raycast and storing the first hit if existing
-            RaycastHit leftHit;
-            bool hasLeftHit = Physics.Raycast(leftController.transform.position, leftController.transform.forward, out leftHit, Mathf.Infinity);
-
-            if (!hasLeftHit)
-            {
-                // if we are not hitting anything, we should unselect the shelf we were hovering over
-                if (leftHoveredShelf != null)
-                {
-                    leftHoveredShelf.isSelected = false;
-                    leftHoveredShelf = null;
-                }
-            }
-            else
-            {
-                // if we are hitting something, we should select the shelf we are hovering over
-                GameObject hitObject = leftHit.collider.gameObject;
-                if (hitObject.tag == "shelfHighlight")
-                {
-                    GameObject shelf = hitObject.transform.parent.gameObject;
-                    if (leftHoveredShelf != null && leftHoveredShelf != shelf)
-                    {
-                        leftHoveredShelf.isSelected = false;
-                    }
-                    leftHoveredShelf = shelf.GetComponent<Shelf>();
-                    leftHoveredShelf.isSelected = true;
-
-                    // Checking that the user pushed the trigger
                     if (this.isLeftTriggerPressedOnce)
                     {
-                        if (leftHoveredShelf != manipulatedShelf)
-                        {
-                            if (manipulatedShelf != null) manipulatedShelf.Release();
-                            manipulatedShelf = leftHoveredShelf;
-                            leftHoveredShelf.FlyToHand(leftController.transform);
-
-                            state = State.ManipulatingLeft;
-                        }
+                        this.currentSelectedObject = item;
                     }
-
-                    leftHandLineRenderer.SetPosition(1, leftHit.point);
                 }
+
+                leftHandLineRenderer.SetPosition(1, itemHit.point);
+                isShelfSelectionNeeded = false;
             }
         }
 
+        if (isShelfSelectionNeeded) HandleShelfSelection();
 
         // DO NOT REMOVE
         // If currentSelectedObject is not null, this will send it to the TaskManager for handling

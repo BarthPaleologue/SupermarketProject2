@@ -17,9 +17,6 @@ public class SelectableObject : MonoBehaviour
     {
         defaultMaterial = this.GetComponent<MeshRenderer>().material;
 
-        // set tag to "groceryItem"
-        this.tag = "groceryItem";
-
         // set layer to "GroceryItems" (layer 6)
         this.gameObject.layer = 6;
 
