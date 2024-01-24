@@ -34,13 +34,17 @@ public class MyTechnique : InteractionTechnique
         rightHandLineRenderer = rightController.GetComponent<LineRenderer>();
     }
 
-    private void UpdateInputState() {
+    private void UpdateInputState()
+    {
         // Manage trigger press from left controller
         if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.1f)
         {
-            if(!isLeftTriggerPressed) {
+            if (!isLeftTriggerPressed)
+            {
                 isLeftTriggerPressedOnce = true;
-            } else {
+            }
+            else
+            {
                 isLeftTriggerPressedOnce = false;
             }
             isLeftTriggerPressed = true;
@@ -54,9 +58,12 @@ public class MyTechnique : InteractionTechnique
         // Manage trigger press from right controller
         if (OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0.1f)
         {
-            if(!isRightTriggerPressed) {
+            if (!isRightTriggerPressed)
+            {
                 isRightTriggerPressedOnce = true;
-            } else {
+            }
+            else
+            {
                 isRightTriggerPressedOnce = false;
             }
             isRightTriggerPressed = true;
@@ -97,22 +104,51 @@ public class MyTechnique : InteractionTechnique
             GameObject hitObject = rightHit.collider.gameObject;
             if (hitObject.tag == "shelfHighlight")
             {
-                GameObject shelf = hitObject.transform.parent.gameObject;
-                if (rightHoveredShelf != null && rightHoveredShelf != shelf)
-                {
-                    rightHoveredShelf.isSelected = false;
-                }
-                rightHoveredShelf = shelf.GetComponent<Shelf>();
-                rightHoveredShelf.isSelected = true;
+                GameObject shelfObject = hitObject.transform.parent.gameObject;
+                Shelf shelf = shelfObject.GetComponent<Shelf>();
 
-                // Checking that the user pushed the trigger
-                if (this.isRightTriggerPressedOnce)
+                if (shelf == manipulatedShelf)
                 {
-                    if (rightHoveredShelf != manipulatedShelf)
+                    // the ray hit the shelf that is currently being manipulated.
+                    // We then perform a second raycast on the items of the shelf to see if we hit one of them (layer 6)
+                    RaycastHit itemHit;
+                    bool hasItemHit = Physics.Raycast(rightControllerTransform.position, rightControllerTransform.forward, out itemHit, Mathf.Infinity, 1 << 6);
+                    if (hasItemHit)
                     {
-                        if(manipulatedShelf != null) manipulatedShelf.Release();
-                        manipulatedShelf = rightHoveredShelf;
-                        rightHoveredShelf.FlyToHand(rightController.transform);
+                        // we hit an item, we should select it
+                        GameObject item = itemHit.collider.gameObject;
+
+                        if (item.tag == "selectableGroceryItem")
+                        {
+                            SelectableObject selectableObject = item.GetComponent<SelectableObject>();
+                            if (selectableObject != null)
+                            {
+                                if (this.isRightTriggerPressedOnce)
+                                {
+                                    this.currentSelectedObject = item;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (rightHoveredShelf != null && rightHoveredShelf != shelf)
+                    {
+                        rightHoveredShelf.isSelected = false;
+                    }
+                    rightHoveredShelf = shelf;
+                    rightHoveredShelf.isSelected = true;
+
+                    // Checking that the user pushed the trigger
+                    if (this.isRightTriggerPressedOnce)
+                    {
+                        if (rightHoveredShelf != manipulatedShelf)
+                        {
+                            if (manipulatedShelf != null) manipulatedShelf.Release();
+                            manipulatedShelf = rightHoveredShelf;
+                            rightHoveredShelf.FlyToHand(rightController.transform);
+                        }
                     }
                 }
             }
@@ -161,7 +197,7 @@ public class MyTechnique : InteractionTechnique
                 {
                     if (leftHoveredShelf != manipulatedShelf)
                     {
-                        if(manipulatedShelf != null) manipulatedShelf.Release();
+                        if (manipulatedShelf != null) manipulatedShelf.Release();
                         manipulatedShelf = leftHoveredShelf;
                         leftHoveredShelf.FlyToHand(leftController.transform);
                     }
@@ -169,7 +205,7 @@ public class MyTechnique : InteractionTechnique
             }
         }
 
-        if(hasLeftHit)
+        if (hasLeftHit)
         {
             leftHandLineRenderer.SetPosition(1, leftHit.point);
         }

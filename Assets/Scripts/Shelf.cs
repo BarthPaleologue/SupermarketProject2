@@ -44,6 +44,9 @@ public class Shelf : MonoBehaviour
 
         // add tag to box
         box.tag = "shelfHighlight";
+
+        // set layer of box to "ShelvesHighlights" (layer 3)
+        box.layer = 3;
         
         // position the box at the same position as the shelf
         box.transform.position = this.transform.position;
@@ -76,6 +79,15 @@ public class Shelf : MonoBehaviour
 
         float distance = (hand.position - this.transform.position).magnitude;
         flySpeed = distance / 10;
+
+        // for every child that has tag "groceryItem", set its tag to "selectableGroceryItem"
+        foreach (Transform child in this.transform)
+        {
+            if (child.tag == "groceryItem")
+            {
+                child.tag = "selectableGroceryItem";
+            }
+        }
     }
 
     public void Release() {
