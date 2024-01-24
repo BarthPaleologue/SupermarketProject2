@@ -13,6 +13,8 @@ public class SelectableObject : MonoBehaviour
     // The material used to indicate to the user that this object was successfully selected
     private Material successMaterial;
 
+    private GameObject boundingBoxHelper;
+
     private void Start()
     {
         defaultMaterial = this.GetComponent<MeshRenderer>().material;
@@ -28,6 +30,34 @@ public class SelectableObject : MonoBehaviour
         {
             transform.parent = hit.transform;
         }
+
+        // create a new box
+        GameObject box = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        box.transform.position = this.transform.position;
+
+        Vector3 bounds = this.GetComponent<Renderer>().bounds.size;
+        Vector3 boxSize = bounds + new Vector3(0.01f, 0.01f, 0.01f);
+        box.transform.localScale = boxSize;
+
+        // remove the collider from the box
+        Destroy(box.GetComponent<BoxCollider>());
+
+        // move the box up by half its height
+        //box.transform.position = new Vector3(box.transform.position.x, box.transform.position.y + boxHeight / 2 - shelfSize.y / 2, box.transform.position.z);
+
+        // set the material of the box to be transparent
+        Material material = new Material(Shader.Find("Transparent/Diffuse"));
+        material.color = new Color(1, 1, 1, 0.3f);
+        box.GetComponent<Renderer>().material = material;
+        box.transform.parent = this.transform;
+        box.SetActive(false);
+
+        this.boundingBoxHelper = box;
+    }
+
+    public void DisplayBoundingBox(bool display)
+    {
+        this.boundingBoxHelper.SetActive(display);
     }
 
     public string GetObjectName()

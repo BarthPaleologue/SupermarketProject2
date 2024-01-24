@@ -46,6 +46,8 @@ public class MyTechnique : InteractionTechnique
     private bool isRightTriggerPressed = false;
     private bool isRightTriggerPressedOnce = false;
 
+    private SelectableObject hoveredSelectableObject = null;
+
     private State state = State.Idle;
 
     private void Start()
@@ -73,7 +75,9 @@ public class MyTechnique : InteractionTechnique
     }
 
     private void Teleport(Vector3 target) {
-        OVRCameraRig.transform.position = new Vector3(target.x, OVRCameraRig.transform.position.y, target.z);
+        // clamp z to avoid teleporting through the wall
+        float z = Mathf.Clamp(target.z, -4.0f, 4.0f);
+        OVRCameraRig.transform.position = new Vector3(target.x, OVRCameraRig.transform.position.y, z);
         rightTeleportTarget.SetActive(false);
         leftTeleportTarget.SetActive(false);
 
@@ -286,6 +290,16 @@ public class MyTechnique : InteractionTechnique
         }
     }
 
+    private void SetHoveredSelectableObject(SelectableObject selectableObject)
+    {
+        if (this.hoveredSelectableObject != null && this.hoveredSelectableObject != selectableObject)
+        {
+            this.hoveredSelectableObject.DisplayBoundingBox(false);
+        }
+        this.hoveredSelectableObject = selectableObject;
+        selectableObject.DisplayBoundingBox(true);
+    }
+
     private void FixedUpdate()
     {
 
@@ -311,6 +325,9 @@ public class MyTechnique : InteractionTechnique
                 GameObject item = itemHit.collider.gameObject;
 
                 SelectableObject selectableObject = item.GetComponent<SelectableObject>();
+                
+                this.SetHoveredSelectableObject(selectableObject);
+                
                 if (selectableObject != null)
                 {
                     if (this.isRightTriggerPressedOnce)
@@ -339,6 +356,9 @@ public class MyTechnique : InteractionTechnique
                 GameObject item = itemHit.collider.gameObject;
 
                 SelectableObject selectableObject = item.GetComponent<SelectableObject>();
+                
+                this.SetHoveredSelectableObject(selectableObject);
+
                 if (selectableObject != null)
                 {
                     if (this.isLeftTriggerPressedOnce)
