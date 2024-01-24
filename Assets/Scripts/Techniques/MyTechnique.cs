@@ -232,6 +232,12 @@ public class MyTechnique : InteractionTechnique
 
                 rightHandLineRenderer.SetPosition(1, itemHit.point);
                 isShelfSelectionNeeded = false;
+
+                if (rightHoveredShelf != null)
+                {
+                    rightHoveredShelf.isSelected = false;
+                    rightHoveredShelf = null;
+                }
             }
         }
         else if (state == State.ManipulatingRight)
@@ -254,6 +260,12 @@ public class MyTechnique : InteractionTechnique
 
                 leftHandLineRenderer.SetPosition(1, itemHit.point);
                 isShelfSelectionNeeded = false;
+
+                if (leftHoveredShelf != null)
+                {
+                    leftHoveredShelf.isSelected = false;
+                    leftHoveredShelf = null;
+                }
             }
         }
 
