@@ -59,7 +59,7 @@ public class MyTechnique : InteractionTechnique
 
         // Creating a teleport target for the left controller
         leftTeleportTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        leftTeleportTarget.transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);        
+        leftTeleportTarget.transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
         leftTeleportTarget.GetComponent<Renderer>().material = material;
         leftTeleportTarget.GetComponent<Collider>().enabled = false;
         leftTeleportTarget.SetActive(false);
@@ -113,7 +113,7 @@ public class MyTechnique : InteractionTechnique
         }
     }
 
-    private void HandleShelfSelection()
+    private void HandleRightShelfSelection()
     {
         // Creating a raycast and storing the first hit if existing
         RaycastHit rightHit;
@@ -127,21 +127,32 @@ public class MyTechnique : InteractionTechnique
                 rightHoveredShelf.SetHighlighted(false);
                 rightHoveredShelf = null;
             }
+
+            if (this.isRightTriggerPressedOnce && manipulatedShelf != null)
+            {
+                manipulatedShelf.Release();
+                manipulatedShelf = null;
+                state = State.Idle;
+            }
         }
         else
         {
             // if we are hitting something, we should select the shelf we are hovering over
             GameObject hitObject = rightHit.collider.gameObject;
-            if (hitObject.tag == "Ground") {
+            if (hitObject.tag == "Ground")
+            {
                 if (rightTeleportTarget != null)
                 {
                     rightTeleportTarget.SetActive(true);
                     rightTeleportTarget.transform.position = rightHit.point;
-                    if(this.isRightTriggerPressedOnce) {
+                    if (this.isRightTriggerPressedOnce)
+                    {
                         OVRCameraRig.transform.position = new Vector3(rightHit.point.x, OVRCameraRig.transform.position.y, rightHit.point.z);
                     }
                 }
-            } else {
+            }
+            else
+            {
                 if (rightTeleportTarget != null)
                 {
                     rightTeleportTarget.SetActive(false);
@@ -187,6 +198,10 @@ public class MyTechnique : InteractionTechnique
                 }
             }
         }
+    }
+
+    private void HandleLeftShelftSelection()
+    {
 
 
         // Creating a raycast and storing the first hit if existing
@@ -201,21 +216,32 @@ public class MyTechnique : InteractionTechnique
                 leftHoveredShelf.SetHighlighted(false);
                 leftHoveredShelf = null;
             }
+
+            if (this.isLeftTriggerPressedOnce && manipulatedShelf != null)
+            {
+                manipulatedShelf.Release();
+                manipulatedShelf = null;
+                state = State.Idle;
+            }
         }
         else
         {
             // if we are hitting something, we should select the shelf we are hovering over
             GameObject hitObject = leftHit.collider.gameObject;
-            if (hitObject.tag == "Ground") {
+            if (hitObject.tag == "Ground")
+            {
                 if (leftTeleportTarget != null)
                 {
                     leftTeleportTarget.SetActive(true);
                     leftTeleportTarget.transform.position = leftHit.point;
-                    if(this.isLeftTriggerPressedOnce) {
+                    if (this.isLeftTriggerPressedOnce)
+                    {
                         OVRCameraRig.transform.position = new Vector3(leftHit.point.x, OVRCameraRig.transform.position.y, leftHit.point.z);
                     }
                 }
-            } else {
+            }
+            else
+            {
                 if (leftTeleportTarget != null)
                 {
                     leftTeleportTarget.SetActive(false);
@@ -261,7 +287,8 @@ public class MyTechnique : InteractionTechnique
 
         UpdateInputState();
 
-        bool isShelfSelectionNeeded = true;
+        bool isRightShelfSelectionNeeded = true;
+        bool isLeftShelfSelectionNeeded = true;
 
         if (state == State.ManipulatingLeft)
         {
@@ -282,7 +309,7 @@ public class MyTechnique : InteractionTechnique
                 }
 
                 rightHandLineRenderer.SetPosition(1, itemHit.point);
-                isShelfSelectionNeeded = false;
+                isRightShelfSelectionNeeded = false;
 
                 if (rightHoveredShelf != null)
                 {
@@ -310,7 +337,7 @@ public class MyTechnique : InteractionTechnique
                 }
 
                 leftHandLineRenderer.SetPosition(1, itemHit.point);
-                isShelfSelectionNeeded = false;
+                isLeftShelfSelectionNeeded = false;
 
                 if (leftHoveredShelf != null)
                 {
@@ -320,7 +347,8 @@ public class MyTechnique : InteractionTechnique
             }
         }
 
-        if (isShelfSelectionNeeded) HandleShelfSelection();
+        if (isRightShelfSelectionNeeded) HandleRightShelfSelection();
+        if (isLeftShelfSelectionNeeded) HandleLeftShelftSelection();
 
         // DO NOT REMOVE
         // If currentSelectedObject is not null, this will send it to the TaskManager for handling
