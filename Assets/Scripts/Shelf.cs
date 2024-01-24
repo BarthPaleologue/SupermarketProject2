@@ -66,7 +66,7 @@ public class Shelf : MonoBehaviour
         box.transform.position = this.transform.position;
 
         // set the height of the box
-        float boxHeight = 2.2f;
+        float boxHeight = 2.25f;
         Vector3 boxSize = new Vector3(shelfSize.x, boxHeight, shelfSize.z) + new Vector3(0.01f, 0.01f, 0.01f);
         box.transform.localScale = boxSize;
 
