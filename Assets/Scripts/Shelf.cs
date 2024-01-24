@@ -82,6 +82,15 @@ public class Shelf : MonoBehaviour
         state = ShelfState.Releasing;
         this.transform.parent = null;
         this.targetParentHand = null;
+
+        // for every child that has tag "selectableGroceryItem", set its tag to "groceryItem"
+        foreach (Transform child in this.transform)
+        {
+            if (child.tag == "selectableGroceryItem")
+            {
+                child.tag = "groceryItem";
+            }
+        }
     }
 
     // Update is called once per frame

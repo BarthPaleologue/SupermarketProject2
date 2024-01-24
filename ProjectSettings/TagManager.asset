@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - shelfHighlight
+  - selectableGroceryItem
+  - groceryItem
   layers:
   - Default
   - TransparentFX

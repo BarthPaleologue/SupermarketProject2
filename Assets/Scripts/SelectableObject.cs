@@ -17,6 +17,9 @@ public class SelectableObject : MonoBehaviour
     {
         defaultMaterial = this.GetComponent<MeshRenderer>().material;
 
+        // set tag to "groceryItem"
+        this.tag = "groceryItem";
+
         // raycast downward to set parent to the shelf below
         RaycastHit hit;
         float distance = 2.0f;
