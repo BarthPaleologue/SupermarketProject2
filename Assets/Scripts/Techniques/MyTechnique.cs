@@ -80,8 +80,13 @@ public class MyTechnique : InteractionTechnique
         Transform rightControllerTransform = rightController.transform;
 
         // Set the beginning of the line renderer to the position of the controller
-        leftHandLineRenderer.SetPosition(0, leftController.transform.position);
-        rightHandLineRenderer.SetPosition(0, rightControllerTransform.position);
+
+        // Determining the end of the LineRenderer depending on whether we hit an object or not
+        rightHandLineRenderer.SetPosition(0, rightControllerTransform.position + rightControllerTransform.forward * 0.05f);
+        rightHandLineRenderer.SetPosition(1, raycastMaxDistance * rightControllerTransform.forward);
+
+        leftHandLineRenderer.SetPosition(0, leftController.transform.position + leftController.transform.forward * 0.05f);
+        leftHandLineRenderer.SetPosition(1, raycastMaxDistance * leftController.transform.forward);
 
         UpdateInputState();
 
@@ -109,6 +114,13 @@ public class MyTechnique : InteractionTechnique
 
                 if (shelf == manipulatedShelf)
                 {
+                    // As we are selecting an item on the manipulated shelf, we are not hovering over another shelf
+                    if (rightHoveredShelf != null)
+                    {
+                        rightHoveredShelf.isSelected = false;
+                        rightHoveredShelf = null;
+                    }
+
                     // the ray hit the shelf that is currently being manipulated.
                     // We then perform a second raycast on the items of the shelf to see if we hit one of them (layer 6)
                     RaycastHit itemHit;
@@ -128,6 +140,8 @@ public class MyTechnique : InteractionTechnique
                                     this.currentSelectedObject = item;
                                 }
                             }
+
+                            rightHandLineRenderer.SetPosition(1, itemHit.point);
                         }
                     }
                 }
@@ -150,18 +164,10 @@ public class MyTechnique : InteractionTechnique
                             rightHoveredShelf.FlyToHand(rightController.transform);
                         }
                     }
+
+                    rightHandLineRenderer.SetPosition(1, rightHit.point);
                 }
             }
-        }
-
-        // Determining the end of the LineRenderer depending on whether we hit an object or not
-        if (hasRightHit)
-        {
-            rightHandLineRenderer.SetPosition(1, rightHit.point);
-        }
-        else
-        {
-            rightHandLineRenderer.SetPosition(1, raycastMaxDistance * rightControllerTransform.forward);
         }
 
 
@@ -205,14 +211,8 @@ public class MyTechnique : InteractionTechnique
             }
         }
 
-        if (hasLeftHit)
-        {
-            leftHandLineRenderer.SetPosition(1, leftHit.point);
-        }
-        else
-        {
-            leftHandLineRenderer.SetPosition(1, raycastMaxDistance * leftController.transform.forward);
-        }
+        if (hasLeftHit) leftHandLineRenderer.SetPosition(1, leftHit.point);
+
 
         // DO NOT REMOVE
         // If currentSelectedObject is not null, this will send it to the TaskManager for handling

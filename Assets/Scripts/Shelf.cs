@@ -29,6 +29,8 @@ public class Shelf : MonoBehaviour
     Transform targetParentHand = null;
     Vector3 targetScale = new Vector3(0.1f, 0.1f, 0.1f);
 
+    GameObject highlightBox;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -70,6 +72,8 @@ public class Shelf : MonoBehaviour
 
         // make the box a child of the shelf
         box.transform.parent = this.transform;
+
+        this.highlightBox = box;
     }
 
     public void FlyToHand(Transform hand)
@@ -88,6 +92,9 @@ public class Shelf : MonoBehaviour
                 child.tag = "selectableGroceryItem";
             }
         }
+
+        // hide the highlight box
+        this.highlightBox.GetComponent<Renderer>().enabled = false;
     }
 
     public void Release() {
@@ -103,6 +110,9 @@ public class Shelf : MonoBehaviour
                 child.tag = "groceryItem";
             }
         }
+
+        // show the highlight box
+        this.highlightBox.GetComponent<Renderer>().enabled = true;
     }
 
     // Update is called once per frame
