@@ -33,7 +33,7 @@ public class SelectableObject : MonoBehaviour
 
         // create a new box to representing the box collider (same scale and orientation as the object, with bounds of the box collider)
         GameObject box = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        box.transform.localScale = this.GetComponent<BoxCollider>().size;
+        box.transform.localScale = this.GetComponent<BoxCollider>().size + new Vector3(0.01f, 0.01f, 0.01f);
         box.transform.rotation = this.transform.rotation;
         box.transform.position = this.transform.position + this.GetComponent<BoxCollider>().center;
 
