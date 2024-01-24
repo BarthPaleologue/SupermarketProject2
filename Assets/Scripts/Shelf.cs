@@ -84,17 +84,17 @@ public class Shelf : MonoBehaviour
         float distance = (hand.position - this.transform.position).magnitude;
         flySpeed = distance / 10;
 
-        // for every child that has tag "groceryItem", set its tag to "selectableGroceryItem"
+        // for every child that has layer "GroceryItems" (layer 6), set it to layer "SelectedGroceryItems" (layer 7)
         foreach (Transform child in this.transform)
         {
-            if (child.tag == "groceryItem")
+            if (child.gameObject.layer == 6)
             {
-                child.tag = "selectableGroceryItem";
+                child.gameObject.layer = 7;
             }
         }
 
-        // hide the highlight box
-        this.highlightBox.GetComponent<Renderer>().enabled = false;
+        // disable the highlight box
+        this.highlightBox.SetActive(false);
     }
 
     public void Release() {
@@ -102,17 +102,17 @@ public class Shelf : MonoBehaviour
         this.transform.parent = null;
         this.targetParentHand = null;
 
-        // for every child that has tag "selectableGroceryItem", set its tag to "groceryItem"
+        // for every child that has layer "SelectedGroceryItems" (layer 7), set it to layer "GroceryItems" (layer 6)
         foreach (Transform child in this.transform)
         {
-            if (child.tag == "selectableGroceryItem")
+            if (child.gameObject.layer == 7)
             {
-                child.tag = "groceryItem";
+                child.gameObject.layer = 6;
             }
         }
 
         // show the highlight box
-        this.highlightBox.GetComponent<Renderer>().enabled = true;
+        this.highlightBox.SetActive(true);
     }
 
     // Update is called once per frame
