@@ -65,8 +65,8 @@ public class Shelf : MonoBehaviour
 
         // set the height of the box
         float boxHeight = 2.2f;
-        Vector3 boxSize = new Vector3(shelfSize.x, boxHeight, shelfSize.z);
-        box.transform.localScale = boxSize * 1.02f;
+        Vector3 boxSize = new Vector3(shelfSize.x, boxHeight, shelfSize.z) + new Vector3(0.01f, 0.01f, 0.01f);
+        box.transform.localScale = boxSize;
 
         // move the box up by half its height
         box.transform.position = new Vector3(box.transform.position.x, box.transform.position.y + boxHeight / 2 - shelfSize.y / 2, box.transform.position.z);
@@ -146,7 +146,7 @@ public class Shelf : MonoBehaviour
         }
         else
         {
-            material.color = new Color(1, 1, 1, 0.2f);
+            material.color = new Color(1, 1, 1, 0.1f);
         }
 
         if(state == ShelfState.FlyingToHand) {
@@ -178,10 +178,6 @@ public class Shelf : MonoBehaviour
                 state = ShelfState.Manipulating;
                 this.transform.parent = targetParentHand;
             }
-        }
-
-        if(state == ShelfState.Manipulating) {
-            // do some stuff
         }
 
         // The shelf is flying away
