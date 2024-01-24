@@ -21,6 +21,8 @@ public class MyTechnique : InteractionTechnique
     [SerializeField]
     int raycastMaxDistance = 1000;
 
+    [SerializeField]
+    private GameObject OVRCameraRig;
 
     [SerializeField]
     private GameObject leftController;
@@ -30,6 +32,9 @@ public class MyTechnique : InteractionTechnique
 
     private LineRenderer leftHandLineRenderer;
     private LineRenderer rightHandLineRenderer;
+
+    private GameObject leftTeleportTarget;
+    private GameObject rightTeleportTarget;
 
     private Shelf leftHoveredShelf = null;
     private Shelf rightHoveredShelf = null;
@@ -47,6 +52,24 @@ public class MyTechnique : InteractionTechnique
     {
         leftHandLineRenderer = leftController.GetComponent<LineRenderer>();
         rightHandLineRenderer = rightController.GetComponent<LineRenderer>();
+
+
+        Material material = new Material(Shader.Find("Transparent/Diffuse"));
+        material.color = new Color(0, 0, 1, 0.5f);
+
+        // Creating a teleport target for the left controller
+        leftTeleportTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        leftTeleportTarget.transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);        
+        leftTeleportTarget.GetComponent<Renderer>().material = material;
+        leftTeleportTarget.GetComponent<Collider>().enabled = false;
+        leftTeleportTarget.SetActive(false);
+
+        // Creating a teleport target for the right controller
+        rightTeleportTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        rightTeleportTarget.transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
+        rightTeleportTarget.GetComponent<Renderer>().material = material;
+        rightTeleportTarget.GetComponent<Collider>().enabled = false;
+        rightTeleportTarget.SetActive(false);
     }
 
     private void UpdateInputState()
@@ -109,6 +132,21 @@ public class MyTechnique : InteractionTechnique
         {
             // if we are hitting something, we should select the shelf we are hovering over
             GameObject hitObject = rightHit.collider.gameObject;
+            if (hitObject.tag == "Ground") {
+                if (rightTeleportTarget != null)
+                {
+                    rightTeleportTarget.SetActive(true);
+                    rightTeleportTarget.transform.position = rightHit.point;
+                    if(this.isRightTriggerPressedOnce) {
+                        OVRCameraRig.transform.position = new Vector3(rightHit.point.x, OVRCameraRig.transform.position.y, rightHit.point.z);
+                    }
+                }
+            } else {
+                if (rightTeleportTarget != null)
+                {
+                    rightTeleportTarget.SetActive(false);
+                }
+            }
             if (hitObject.tag == "shelfHighlight")
             {
                 GameObject shelfObject = hitObject.transform.parent.gameObject;
@@ -122,8 +160,6 @@ public class MyTechnique : InteractionTechnique
                         rightHoveredShelf.SetHighlighted(false);
                         rightHoveredShelf = null;
                     }
-
-
                 }
                 else
                 {
@@ -170,6 +206,21 @@ public class MyTechnique : InteractionTechnique
         {
             // if we are hitting something, we should select the shelf we are hovering over
             GameObject hitObject = leftHit.collider.gameObject;
+            if (hitObject.tag == "Ground") {
+                if (leftTeleportTarget != null)
+                {
+                    leftTeleportTarget.SetActive(true);
+                    leftTeleportTarget.transform.position = leftHit.point;
+                    if(this.isLeftTriggerPressedOnce) {
+                        OVRCameraRig.transform.position = new Vector3(leftHit.point.x, OVRCameraRig.transform.position.y, leftHit.point.z);
+                    }
+                }
+            } else {
+                if (leftTeleportTarget != null)
+                {
+                    leftTeleportTarget.SetActive(false);
+                }
+            }
             if (hitObject.tag == "shelfHighlight")
             {
                 GameObject shelf = hitObject.transform.parent.gameObject;
